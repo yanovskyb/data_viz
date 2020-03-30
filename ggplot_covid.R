@@ -1,17 +1,23 @@
 library(tidyverse)
 library(shadowtext)
 
+#Setting theme to black and white
 theme_set(theme_bw())
 
+#Download the file
 state_trends = read.csv(
   "https://covidtracking.com/api/states/daily.csv", stringsAsFactors = F)
 
+#Some minor data cleaning
+#removing dates with < 10 case counts so that the starting point for all states is the first date they reported 10 or more cases
+#Also have to create new x values called new_date that counts up from 1 on the date each state started reporting 10 ore more cases
 state_trends = state_trends %>% 
-  filter(positive >= 10 | state %in% c("CA","WA")) %>%
+  filter(positive >= 10) %>%
   group_by(state) %>%
   dplyr::arrange(date) %>%
   mutate(new_date = seq(1:n()))
 
+#Complete code for the graph
 state_trends %>%
   ggplot(aes(x=new_date, y=positive, group = state)) +
   geom_line(data = state_trends %>% filter(!state %in% c('CA','NY','WA')), size = 1, color = 'gray50', alpha = .3) +
